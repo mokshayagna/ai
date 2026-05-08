@@ -6,7 +6,6 @@ def main():
     
     chat = client.chats.create(model=MODEL_NAME)
     
-    
     prompt = "who is the president of India?"
     response = chat.send_message(prompt)
     print(response.text)
