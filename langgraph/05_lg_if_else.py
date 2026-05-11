@@ -1,0 +1,119 @@
+from langgraph.graph import StateGraph, START, END
+from ig_utility import save_graph_as_png
+from typing import TypedDict
+
+def is_n_prime(n):
+    if n == 2:
+        return True
+    
+    for i in range(2, n):
+        if n%i == 0:
+            return False
+    
+    return True
+
+class State(TypedDict):
+    n: int
+    is_even: bool
+    is_odd: bool
+    is_prime: bool
+    route: str
+    output: str
+
+def initialize_state_defaults(state: dict):
+    ret_state =  {
+        "n": state.get("n", 0),
+        "is_even": False,
+        "is_odd": False,
+        "is_prime": False,
+        "route": None,
+        "output": None
+    }
+    
+    return ret_state
+
+def route_validator(state: State):
+    retval = state["route"]
+
+    return retval
+
+def is_even(state: State):
+    if state["n"] % 2 == 0:
+        state["is_even"] = True
+        state["route"] = "it_is_even"
+    else:
+        state["is_even"] = False
+        state["route"] = "it_is_not_even"
+    
+    return state
+
+def is_odd(state: State):
+    if state["n"] % 2 == 0:
+        state["is_odd"] = False
+    else:
+        state["is_odd"] = True
+    return state
+
+def is_prime(state: State):
+    n = state["n"]
+    state["is_prime"] = is_n_prime(n)
+
+    return state
+
+def build_output(state: State):
+    if state['is_even']:
+        tstr = f"{state['n']} is Even number"
+    else:
+        tstr = f"{state['n']} is Odd number"
+
+    if state["is_prime"]:
+        tstr += " and Prime"
+    else:
+        tstr += " and Not a Prime"
+        
+    state["output"] = tstr
+    return state
+    
+def build_graph():
+    builder = StateGraph(State)
+    
+    builder.add_node("INITIALIZER", initialize_state_defaults)
+    builder.add_node("EVEN_NUM", is_even)
+    builder.add_node("ODD_NUM", is_odd)
+    builder.add_node("PRIME_NUM", is_prime)
+    builder.add_node("OUTPUT", build_output)
+    
+    builder.add_edge(START, "INITIALIZER")
+    builder.add_edge("INITIALIZER", "EVEN_NUM")
+    builder.add_conditional_edges(
+        "EVEN_NUM", 
+        route_validator, {
+            "it_is_even": "OUTPUT",
+            "it_is_not_even": "ODD_NUM"
+        }
+    )
+    builder.add_edge("ODD_NUM", "PRIME_NUM")
+    builder.add_edge("PRIME_NUM", "OUTPUT")
+    builder.add_edge("OUTPUT", END)
+
+    graph = builder.compile()
+
+    save_graph_as_png(graph, __file__)
+
+    return graph
+
+
+graph = build_graph()
+    
+
+def main():
+    response = graph.invoke({"n": 10})
+    print(f"Response :{response['output']}")
+    print()
+    
+    response = graph.invoke({"n": 17})
+    print(f"Response :{response['output']}")
+    print()
+
+if __name__ == "__main__":
+    main()

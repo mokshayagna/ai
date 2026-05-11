@@ -59,6 +59,8 @@ def main():
             }
         ],
     }
+    
+    
     user_message = {
         "role": "user",
         "parts": [{"text": prompt}]
