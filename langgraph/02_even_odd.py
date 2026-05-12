@@ -2,12 +2,12 @@ from langgraph.graph import StateGraph, START, END
 from ig_utility import save_graph_as_png
 from typing import TypedDict
 
-class sate(TypedDict):
+class state(TypedDict):
     n: int
     result: str
     
     
-def is_even(state: sate) -> sate:
+def is_even(state: state) -> state:
     
     if state["n"] % 2 == 0:
         return {"n": state["n"], "result": "even"}
@@ -16,7 +16,7 @@ def is_even(state: sate) -> sate:
     
 def build_graph():
     
-    builder = StateGraph(sate)
+    builder = StateGraph(state)
     
     builder.add_node("EVEN_OR_ODD", is_even)
     

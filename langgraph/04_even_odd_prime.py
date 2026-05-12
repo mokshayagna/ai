@@ -5,7 +5,7 @@ from typing import TypedDict
 class state(TypedDict):
     n : int
     result: str
-    count: int
+    
 def is_even(state: state) -> state:
     if state["n"] % 2 == 0:
         return {"n": state["n"], "result": "even"}
