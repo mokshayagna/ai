@@ -1,36 +1,38 @@
 import random
 from langchain_core.tools import tool
-
 @tool
 def flipkart_item_id_tool(item_name: str) -> str:
     """Retrieves item id from Flipkart"""
 
-    flipkart_items = {
-        "iPhone 13": "FK12345",
-        "Samsung Galaxy S21": "FK54321",
-        "MacBook Pro": "FK67890"
-    }
+    flipkart_items = [
+        {"item_id": "FK12345", "name": "iPhone 13"},
+        {"item_id": "FK54321", "name": "Samsung Galaxy S21"},
+        {"item_id": "FK67890", "name": "MacBook Pro"}
+    ]
 
     for item in flipkart_items:
-        if item.lower() == item_name.lower():
-            return flipkart_items[item]
+
+        if item["name"].lower() == item_name.lower():
+
+            return item["item_id"]
 
     return "Item not found"
+
 
 @tool
 def flipkart_quantity_tool(item_id: str) -> int:
     """Retrieves available quantity of the item from Flipkart"""
 
-    # Simulating quantity retrieval with random numbers for demonstration
-    flipkart_items_quantity = {
-        "item_id": "FK12345","name": "iPhone 13", "quantity": 10,
-        "item_id": "FK54321","name": "Samsung Galaxy S21", "quantity": 5,
-        "item_id": "FK67890","name": "MacBook Pro", "quantity": 2
-    }
-    
+    flipkart_items_quantity = [
+        {"item_id": "FK12345", "name": "iPhone 13", "quantity": 7},
+        {"item_id": "FK54321", "name": "Samsung Galaxy S21", "quantity": 4},
+        {"item_id": "FK67890", "name": "MacBook Pro", "quantity": 1}
+    ]
+
     for item in flipkart_items_quantity:
+
         if item["item_id"] == item_id:
-            retval = item["quantity"]
-            return retval
+
+            return item["quantity"]
     return f"that much quantity not found but we have {item['quantity']} quantity available"
 
