@@ -19,7 +19,6 @@ from amazon import amazon_item_with_discount
 from flipkart import flipkart_item_with_discount
 from meesho import meesho_item_with_discount
 
-
 def ordering_agent(state: MessagesState, llm):
     
     msg = """You are a shopping assistant. Your task is to help the user find the item they want to purchase
@@ -107,7 +106,6 @@ def main():
     Hmsg = (
         """query: I want to order 12 an iphone 13 from the e-commerce platforms,
         
-        
         Tools to use: flipkart_item_id_tool, amazon_item_id_tool, meesho_item_id_tool,
         flipkart_quantity_tool, amazon_quantity_tool, meesho_quantity_tool,
         amazon_item_with_discount, flipkart_item_with_discount, meesho_item_with_discount 
@@ -135,5 +133,4 @@ def main():
     for m in response["messages"]:
         m.pretty_print()
 if __name__ == "__main__":
-    
     main()
