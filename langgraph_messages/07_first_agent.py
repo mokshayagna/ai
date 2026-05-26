@@ -72,7 +72,7 @@ def build_graph():
     save_graph_as_png(graph, __file__)
     
     return graph
-
+    
 graph = build_graph()
 
 def main():
