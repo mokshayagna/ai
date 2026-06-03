@@ -37,7 +37,7 @@ def ordering_agent(state: MessagesState, llm):
 
 def build_graph():
     builder = StateGraph(MessagesState)
-    MODEL = "gemini-2.0-flash"
+    MODEL = "gemini-2.5-flash"
     llm = ChatGoogleGenerativeAI(model=MODEL)
     
     tools = [
@@ -130,7 +130,13 @@ def main():
     hmsg = HumanMessage(content=msg)
     init_msg = {"messages": [hmsg]}
     response = graph.invoke(init_msg)
-    for m in response["messages"]:
-        m.pretty_print()
+    content = response["messages"][-1].content
+
+    if isinstance(content, list):
+        for block in content:
+            if isinstance(block, dict) and "text" in block:
+                print(block["text"])
+    else:
+        print(content)
 if __name__ == "__main__":
     main()
