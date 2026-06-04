@@ -6,7 +6,7 @@ def is_even(number: int) -> bool:
     return number % 2 == 0
 
 def main():
-    model_name = "gemini-2.0-flash-001"
+    model_name = "gemini-3.5-flash"
     
     # Create client
     client = genai.Client()
