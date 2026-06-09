@@ -18,7 +18,7 @@ async def main():
         ],
         env={
             "GITHUB_PERSONAL_ACCESS_TOKEN":
-                os.environ["GITHUB_PERSONAL_ACCESS_TOKEN"]
+                os.getenv("GITHUB_TOKEN")
         }
     )
 
