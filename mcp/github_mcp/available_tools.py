@@ -5,6 +5,7 @@ from mcp import ClientSession
 from mcp.client.stdio import stdio_client, StdioServerParameters
 
 async def main():
+
     server_params = StdioServerParameters(
         command="docker",
         args=[
@@ -23,20 +24,16 @@ async def main():
 
     async with stdio_client(server_params) as (read_stream, write_stream):
 
-        async with ClientSession(
-            read_stream,
-            write_stream
-        ) as session:
+        async with ClientSession(read_stream,write_stream) as session:
 
             await session.initialize()
 
-            tools = await session.list_tools()
-
+            result = await session.list_tools()
+            
             print("\nAvailable Tools:\n")
-
-            for tool in tools.tools:
+            
+            for tool in result.tools:
                 print(tool.name)
-
 
 if __name__ == "__main__":
     asyncio.run(main())

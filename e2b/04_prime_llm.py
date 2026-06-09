@@ -47,9 +47,7 @@ def run_code():
     if sandbox is None:
         return "Sandbox not created."
 
-    result = sandbox.commands.run(
-        "python /home/user/prime.py"
-    )
+    result = sandbox.commands.run("python /home/user/prime.py")
 
     return result.stdout
 
@@ -76,30 +74,19 @@ Follow these steps:
     return {"messages": [response]}
 
 def build_graph():
-    model = ChatGoogleGenerativeAI(
-        model= "gemini-3.5-flash"
-    )
+    model = ChatGoogleGenerativeAI(model= "gemini-3.5-flash")
 
     llm_with_tools = model.bind_tools(tools)
 
     builder = StateGraph(MessagesState)
 
-    builder.add_node(
-        "ASK_LLM",
-        partial(ask_llm, llm=llm_with_tools)
-    )
+    builder.add_node("ASK_LLM",partial(ask_llm, llm=llm_with_tools))
 
-    builder.add_node(
-        "tools",
-        ToolNode(tools)
-    )
+    builder.add_node("tools",ToolNode(tools))
 
     builder.add_edge(START, "ASK_LLM")
 
-    builder.add_conditional_edges(
-        "ASK_LLM",
-        tools_condition
-    )
+    builder.add_conditional_edges("ASK_LLM",tools_condition)
 
     builder.add_edge("tools", "ASK_LLM")
 
