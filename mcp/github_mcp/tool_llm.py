@@ -16,7 +16,6 @@ async def available_tools(session):
     tools = await load_mcp_tools(session)
     return tools
 
-
 async def ask_llm(state: MessagesState, llm):
     system_prompt = """
 You are a GitHub MCP assistant.
@@ -31,12 +30,14 @@ When a user asks to:
 
 ALWAYS use the appropriate GitHub tool.
 
+IMPORTANT - When creating or updating a file:
+1. First use get_file_contents to check if the file already exists
+2. If it exists, use the SHA from the response to update it
+3. If it does not exist, create it fresh
+
 Do not explain which tool you would use.
-
 Execute the tool directly.
-
-After the tool completes,
-summarize the result for the user.
+After the tool completes, summarize the result for the user.
 """
     response = await llm.ainvoke([SystemMessage(content=system_prompt)] + state["messages"])
     return {"messages": [response]}
@@ -94,7 +95,9 @@ Create a new file in the GitHub repository mokshayagna/ai.
 File details:
 - Path: mcp/github_mcp/just_test.py
 - Content:
-# just_test.py
+a = 10
+if a > 5:
+    print("a is greater than 5")
 
 Commit this file directly to the default branch.
 
