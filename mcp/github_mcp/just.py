@@ -1,15 +1,11 @@
-import warnings
-warnings.filterwarnings("ignore", category=FutureWarning)
+import asyncio
+from mcp.client.streamable_http import streamablehttp_client
 
+async def main():
+    async with streamablehttp_client(
+        "http://localhost:8082/mcp"
+    ) as streams:
+        print(type(streams))
+        print(streams)
 
-from langchain_google_genai import ChatGoogleGenerativeAI
-
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    project="genai-432214",
-    location="us-central1",
-)
-
-response = llm.invoke("Hello")
-
-print(response.content)
+asyncio.run(main())
