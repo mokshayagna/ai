@@ -48,30 +48,34 @@ async def make_jira_request(method: str, endpoint: str, data: Dict = None) -> Di
     url = f"{JIRA_BASE_URL}{endpoint}"
     headers = get_headers()
     
-    async with httpx.AsyncClient() as client:
-        if method.upper() == "GET":
-            response = await client.get(url, headers=headers)
-        elif method.upper() == "POST":
-            response = await client.post(url, headers=headers, json=data)
-        elif method.upper() == "PUT":
-            response = await client.put(url, headers=headers, json=data)
-        elif method.upper() == "DELETE":
-            response = await client.delete(url, headers=headers)
-        else:
-            raise ValueError(f"Unsupported HTTP method: {method}")
-        
-        if response.status_code >= 400:
-            return {
-                "error": True,
-                "status_code": response.status_code,
-                "message": response.text
-            }
-        
-        # Handle empty responses (like 204 No Content for updates)
-        if response.status_code == 204 or len(response.content) == 0:
-            return {"success": True}
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            if method.upper() == "GET":
+                response = await client.get(url, headers=headers)
+            elif method.upper() == "POST":
+                response = await client.post(url, headers=headers, json=data)
+            elif method.upper() == "PUT":
+                response = await client.put(url, headers=headers, json=data)
+            elif method.upper() == "DELETE":
+                response = await client.delete(url, headers=headers)
+            else:
+                raise ValueError(f"Unsupported HTTP method: {method}")
             
-        return response.json()
+            if response.status_code >= 400:
+                return {
+                    "error": True,
+                    "status_code": response.status_code,
+                    "message": response.text
+                }
+            
+            if response.status_code == 204 or len(response.content) == 0:
+                return {"success": True}
+                
+            return response.json()
+
+    except Exception as e:
+        print(f"DEBUG EXCEPTION: {type(e).__name__}: {e}", file=sys.stderr)
+        return {"error": True, "status_code": 0, "message": str(e)}
 
 # === TOOLS ===
 
@@ -104,11 +108,11 @@ async def GET_ISSUE(issue_key: str) -> str:
     formatted = [
         f"Issue: {result.get('key', 'Unknown')}",
         f"Summary: {fields.get('summary', 'No summary')}",
-        f"Status: {fields.get('status', {}).get('name', 'Unknown')}",
-        f"Type: {fields.get('issuetype', {}).get('name', 'Unknown')}",
-        f"Priority: {fields.get('priority', {}).get('name', 'Unknown')}",
-        f"Assignee: {fields.get('assignee', {}).get('displayName', 'Unassigned')}",
-        f"Reporter: {fields.get('reporter', {}).get('displayName', 'Unknown')}",
+        f"Status: {(fields.get('status') or {}).get('name', 'Unknown')}",
+        f"Type: {(fields.get('issuetype') or {}).get('name', 'Unknown')}",
+        f"Priority: {(fields.get('priority') or {}).get('name', 'Unknown')}",
+        f"Assignee: {(fields.get('assignee') or {}).get('displayName', 'Unassigned')}",
+        f"Reporter: {(fields.get('reporter') or {}).get('displayName', 'Unknown')}",
         f"Created: {fields.get('created', 'Unknown')}",
         f"Updated: {fields.get('updated', 'Unknown')}",
         "",
@@ -160,13 +164,9 @@ async def SEARCH_ISSUES(jql: str, max_results: int = 10) -> str:
         jql: JQL query string (e.g., "project = PROJ AND status = Open")
         max_results: Maximum number of results to return (default: 10)
     """
-    # Updated to use new API v3 /search/jql GET endpoint
     import urllib.parse
     
-    # URL encode the JQL query
     encoded_jql = urllib.parse.quote(jql)
-    
-    # Build the endpoint with query parameters
     endpoint = f"/rest/api/3/search/jql?jql={encoded_jql}&maxResults={max_results}&fields=key,summary,status,issuetype,priority,assignee"
     
     result = await make_jira_request("GET", endpoint)
@@ -182,8 +182,12 @@ async def SEARCH_ISSUES(jql: str, max_results: int = 10) -> str:
     
     for issue in issues:
         fields = issue.get("fields", {})
-        status = fields.get("status", {}).get("name", "Unknown")
-        assignee = fields.get("assignee", {}).get("displayName", "Unassigned")
+        
+        status_field = fields.get("status")
+        status = status_field.get("name", "Unknown") if status_field else "Unknown"
+        
+        assignee_field = fields.get("assignee")
+        assignee = assignee_field.get("displayName", "Unassigned") if assignee_field else "Unassigned"
         
         formatted.append(
             f"{issue.get('key')}: {fields.get('summary', 'No summary')} "
