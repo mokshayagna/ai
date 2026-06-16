@@ -19,6 +19,17 @@ async def Create_issue(server_url: str):
                 "priority": "Medium"
             }
         )
+        
+        resp = await session.call_tool(
+    "CREATE_ISSUE",
+    {
+        "project_key": "PROM",
+        "summary": "Priority Test",
+        "description": "Testing priority",
+        "issue_type": "Task",
+        "priority": "Highest"
+    }
+)
         print("Issue created successfully!")
         print(resp)
         

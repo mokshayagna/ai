@@ -4,17 +4,15 @@ from contextlib import AsyncExitStack
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
 
-async def search_issues_simple(server_url: str, jql: str, max_results: int = 10):
+async def get_issue(server_url: str, issue_key: str):
     async with AsyncExitStack() as stack:
         r, w, _ = await stack.enter_async_context(streamablehttp_client(server_url))
         session = await stack.enter_async_context(ClientSession(r, w))
         await session.initialize()
 
-        params = {"jql": jql, "max_results": max_results}
-        resp = await session.call_tool("SEARCH_ISSUES", params)
+        resp = await session.call_tool("GET_ISSUE", {"issue_key": issue_key})
         print(resp.content[0].text)
 
 if __name__ == "__main__":
     SERVER_URL = os.getenv("MCP_SERVER_URL") or "http://127.0.0.1:3333/mcp"
-    JQL = "project = PROM AND status != Done ORDER BY created DESC"
-    asyncio.run(search_issues_simple(SERVER_URL, JQL, max_results=10))
+    asyncio.run(get_issue(SERVER_URL, "PROM-6"))
