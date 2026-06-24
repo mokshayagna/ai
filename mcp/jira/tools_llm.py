@@ -62,7 +62,6 @@ async def connect_mcp_node(state):
 
 
 def route_node(state):
-
     return state["route"]
 
 
